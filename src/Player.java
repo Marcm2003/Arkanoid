@@ -3,14 +3,13 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 
 public class Player {
-    private int originalSpeed = 0;
+    private final int originalSpeed;
     private int x;
     private int y;
-    private int width;
-    private int height;
+    private final int width;
+    private final int height;
     private int speed;
 
-    private int boostSpeed = 2;
     private final Color color;
 
 
@@ -34,29 +33,16 @@ public class Player {
         return y;
     }
 
-    public int getLeft() {
-        return getX();
-    }
-
-    public int getRight() {
-        return getX() + getWidth();
-    }
-
-
     public int getWidth() {
         return width;
     }
 
-    public int getHeight() {
-        return height;
-    }
-
-    public Color getColor() {
-        return color;
-    }
-
     public int getSpeed() {
         return speed;
+    }
+
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, width, height);
     }
 
     public void moveLeft() {
@@ -74,11 +60,6 @@ public class Player {
         }
     }
 
-    public Rectangle getBounds() {
-        return new Rectangle(x, y, width, height);
-    }
-
-
     public void reset(int x, int y) {
         this.x = x;
         this.y = y;
@@ -91,7 +72,8 @@ public class Player {
 
     public void increaseSpeed(int speedBoost) {
         if(speed < 30){
-        speed = boostSpeed * speed;
+            int boostSpeed = 2;
+            speed = boostSpeed * speed;
         }
     }
 

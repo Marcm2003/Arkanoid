@@ -17,25 +17,6 @@ public class Ball {
         this.color = color;
     }
 
-    public void draw(Graphics g) {
-        g.setColor(color);
-        g.fillOval(x, y, diameter, diameter);
-    }
-
-    public void move() {
-        x += xSpeed;
-        y += ySpeed;
-    }
-
-    public Rectangle getBounds() {
-        return new Rectangle(x, y, diameter, diameter);
-    }
-
-    public boolean collidesWith(Rectangle rect) {
-        return getBounds().intersects(rect);
-    }
-
-
     public int getLeft() {
         return x;
     }
@@ -60,10 +41,6 @@ public class Ball {
         this.y = y;
     }
 
-    public void setX(int x) {
-        this.x = x;
-    }
-
     public int getX() {
         return x;
     }
@@ -76,24 +53,30 @@ public class Ball {
         return diameter;
     }
 
-    public int getXSpeed() {
-        return xSpeed;
-    }
-
-    public int getYSpeed() {
-        return ySpeed;
-    }
-
     public void setXSpeed(int xSpeed) {
         this.xSpeed = xSpeed;
     }
 
-    public void setYSpeed(int ySpeed) {
-        this.ySpeed = ySpeed;
-    }
-
     public int getBottom() {
         return y + diameter;
+    }
+
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, diameter, diameter);
+    }
+
+    public void draw(Graphics g) {
+        g.setColor(color);
+        g.fillOval(x, y, diameter, diameter);
+    }
+
+    public void move() {
+        x += xSpeed;
+        y += ySpeed;
+    }
+
+    public boolean collidesWith(Rectangle rect) {
+        return getBounds().intersects(rect);
     }
 
     public void reset(int x, int y, int diameter, int xSpeed, int ySpeed, Color color) {

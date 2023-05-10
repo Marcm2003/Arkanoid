@@ -4,6 +4,15 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
+//Music imports
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.Clip;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
+import java.io.File;
+import java.io.IOException;
+
 
 public class Game extends JPanel {
     int numColumns = 13;  // Num of colums
@@ -62,32 +71,39 @@ public class Game extends JPanel {
         initBlocks();  // Initialize blocks
     }
 
+    private Clip loadSound(String filePath) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
+        AudioInputStream audioInputStream = AudioSystem.getAudioInputStream(new File(filePath));
+        Clip clip = AudioSystem.getClip();
+        clip.open(audioInputStream);
+        return clip;
+    }
+
 
     private void initBlocks() {
         for (int j = 0; j < numRows ; j++) {
 
-            int x = 0; // Posició inicial en l'eix X
-            int y = 50; // Posició inicial en l'eix Y
+            int x = 0;
+            int y = 50;
 
             for (int i = 0; i < numColumns; i++) {
 
-                // Generar blocs verds
+                // Generates green block
                 GreenBlock greenBlock = new GreenBlock(x, y, blockWidth, blockHeight);
                 blocks.add(greenBlock);
                 y += blockHeight + gap;
 
-                // Generar bloc vermell
+                // Generates red blovk
                 RedBlock redBlock = new RedBlock(x, y, blockWidth, blockHeight);
                 blocks.add(redBlock);
                 y += blockHeight + gap;
 
-                // Generar bloc blau
+                // Generates blue block
                 BlueBlock blueBlock = new BlueBlock(x, y, blockWidth, blockHeight, 2);
                 blocks.add(blueBlock);
                 //y += blockHeight + gap;
 
 
-                // Actualitzar la posició per passar a la següent columna
+                // Updates the positions to go to the next colum
                 x += blockWidth + gap;
                 y = 50;
             }
@@ -119,6 +135,7 @@ public class Game extends JPanel {
         player.draw(g);
         drawHUD(g);
         if (gameOver) {
+            paused = false;
             drawGameOver(g);
         }
         if (paused) {
@@ -168,16 +185,21 @@ public class Game extends JPanel {
     }
 
     public boolean isGameOver() {
+        paused = false;
         return numLives == 0 || blocks.isEmpty();
     }
 
-    public void update() {
+    public void update() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         if (!paused && !isGameOver()) {
             updates++;
                 // Comprobar colisión con los bloques
                 for (int i = 0; i < blocks.size(); i++) {
                     Block block = blocks.get(i);
                     if (ball.collidesWith(block.getBounds())) {
+
+                        Clip soundClip = loadSound("resources/sounds/block.wav");
+                        soundClip.start();
+
                         // Verificar si es un bloque azul
                         if (block instanceof BlueBlock blueBlock) {
                             int speedBoost = blueBlock.getSpeedBoost();
@@ -195,6 +217,10 @@ public class Game extends JPanel {
                         if(block instanceof RedBlock redBlock){
                         if (block.hitsToFall==0){
                             redBlock.falling = true;
+
+                            Clip soundClip2 = loadSound("resources/sounds/redBlock.wav");
+                            soundClip2.start();
+
                             if (numLives == 0) {
                                 blocks.remove(i);
                             }
@@ -209,6 +235,8 @@ public class Game extends JPanel {
 
                         block.hitsToBreak --;
                         block.hitsToFall --;
+                        Clip soundClip3 = loadSound("resources/sounds/pip.wav");
+                        soundClip3.start();
                         ball.reverseY();
 
 
@@ -228,6 +256,8 @@ public class Game extends JPanel {
 
             // Check collition with player
             if (ball.collidesWith(player.getBounds())) {
+                Clip soundClip = loadSound("resources/sounds/player.wav");
+                soundClip.start();
                 collitions++;
                 int playerCenter = player.getX() + (player.getWidth() / 2);
                 int ballCenter = ball.getX() + (ball.getDiameter() / 2);
@@ -253,19 +283,27 @@ public class Game extends JPanel {
 
             // Check ball top collition
             if (ball.getTop() < 0) {
+
+                Clip soundClip = loadSound("resources/sounds/wall.wav");
+                soundClip.start();
+
                 ball.reverseY();
                 ball.setY(0);
             }
 
             // Check ball top with the sides
             if (ball.getLeft() < 0 || ball.getRight() > getWidth()) {
+                Clip soundClip = loadSound("resources/sounds/wall.wav");
+                soundClip.start();
                 ball.reverseX();
             }
 
             // Check ball top the end
             if (ball.getBottom() > getHeight()) {
                 numLives--;
-                //background color change
+                Clip soundClip2 = loadSound("resources/sounds/live.wav");
+                soundClip2.start();
+                //background color change beta
                 Timer timer = new Timer(200, e -> setBackground(Color.orange));
                 timer.setRepeats(false);
                 timer.start();
@@ -280,6 +318,8 @@ public class Game extends JPanel {
                 timer4.start();
                 if (numLives == 0) {
                     gameOver = true;
+                    Clip soundClip3 = loadSound("resources/sounds/gameover.wav");
+                    soundClip3.start();
                 } else {
                     ball.reset(230, 400, 15, 0, 5, Color.WHITE);
                     paused = true;
@@ -295,10 +335,12 @@ public class Game extends JPanel {
     }
 
 
-    public void levelUp() {
+    public void levelUp() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         if (level == maxLevel) {
             gameOver = true;
         } else {
+            Clip soundClip = loadSound("resources/sounds/levelUP.wav");
+            soundClip.start();
             level++;
             blocks.clear();
             ball.reset(230, 400,ball.getDiameter()/2, 0,4, Color.white);
