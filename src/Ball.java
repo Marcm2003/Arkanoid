@@ -27,22 +27,14 @@ public class Ball {
         y += ySpeed;
     }
 
-    public boolean collidesWith(Block block) {
-        return getBounds().intersects(block.getBounds());
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, diameter, diameter);
     }
 
-    public boolean collidesWith(Player player) {
-        return getBounds().intersects(player.getBounds());
+    public boolean collidesWith(Rectangle rect) {
+        return getBounds().intersects(rect);
     }
 
-    public void reset(int x, int y, int diameter, int xSpeed, int ySpeed, Color color) {
-        this.x = x;
-        this.y = y;
-        this.diameter = diameter;
-        this.xSpeed = xSpeed;
-        this.ySpeed = ySpeed;
-        this.color = color;
-    }
 
     public int getLeft() {
         return x;
@@ -70,10 +62,6 @@ public class Ball {
 
     public void setX(int x) {
         this.x = x;
-    }
-
-    public Rectangle getBounds() {
-        return new Rectangle(x, y, diameter, diameter);
     }
 
     public int getX() {
@@ -106,6 +94,15 @@ public class Ball {
 
     public int getBottom() {
         return y + diameter;
+    }
+
+    public void reset(int x, int y, int diameter, int xSpeed, int ySpeed, Color color) {
+        this.x = x;
+        this.y = y;
+        this.diameter = diameter;
+        this.xSpeed = xSpeed;
+        this.ySpeed = ySpeed;
+        this.color = color;
     }
 
 }

@@ -1,27 +1,41 @@
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.Random;
-import javax.swing.JPanel;
+
 
 public class Game extends JPanel {
-    private static final int BLOCK_WIDTH = 35;
-    private static final int BLOCK_HEIGHT = 20;
-    private static final int NUM_ROWS = 5;
-    private static final int NUM_COLS = 13;
-    private static final int MAX_LEVEL = 3;
-    private final ArrayList<Block> blocks = new ArrayList<>();
-    private final Ball ball = new Ball(230, 400,20, 2,5, Color.white);
-    private final Player player = new Player(200, 550, 80, 20, Color.GRAY,40);
-    private int level = 1;
-    private int numLives = 3;
-    private int score = 0;
-    private boolean paused = true;
-    private boolean gameOver = false;
-    private final Random random = new Random();
+    int numColumns = 13;  // Num of colums
+    int numRows = 1;    // Num of rows
+    int blockWidth = 34; // Block width
+    int blockHeight = 20; // Block height
+    int gap = 0; // Block-block gap
+    private static final int maxLevel = 3; // Num of levels
+    private final ArrayList<Block> blocks;
+    private final Ball ball;
+    private final Player player;
+    private int level;
+    private int numLives;
+    private int score;
+    private boolean paused;
+    private boolean gameOver;
+    private boolean devMode;
+    private int collitions;
+    private int updates;
+
 
     public Game() {
+        blocks = new ArrayList<>();
+        ball = new Ball(230, 400, 15, 0, 4, Color.WHITE);
+        player = new Player(200,550, 80, 10, Color.GRAY, 15);
+        level = 1;
+        numLives = 3;
+        score = 0;
+        collitions = 0;
+        paused = true;
+        gameOver = false;
+        devMode = false;
 
         addKeyListener(new KeyAdapter() {
             @Override
@@ -34,7 +48,12 @@ public class Game extends JPanel {
                         if (gameOver) {
                             reset();  // Reset game on ENTER key press after game over
                         }
+                        if (paused) {
+                            paused = false;
+                        }
+
                     }
+                    case KeyEvent.VK_D -> devMode = !devMode;
                 }
             }
         });
@@ -43,24 +62,43 @@ public class Game extends JPanel {
         initBlocks();  // Initialize blocks
     }
 
-    private final Color[] colors = new Color[]{Color.RED, Color.ORANGE, Color.YELLOW, Color.GREEN, Color.BLUE};
 
     private void initBlocks() {
-        int x, y;
-        for (int i = 0; i < NUM_ROWS; i++) {
-            Color color = colors[i];
-            for (int j = 0; j < NUM_COLS; j++) {
-                x = j * BLOCK_WIDTH;
-                y = i * BLOCK_HEIGHT + 40;
-                blocks.add(new Block(x, y, BLOCK_WIDTH, BLOCK_HEIGHT, color));
+        for (int j = 0; j < numRows ; j++) {
+
+            int x = 0; // Posició inicial en l'eix X
+            int y = 50; // Posició inicial en l'eix Y
+
+            for (int i = 0; i < numColumns; i++) {
+
+                // Generar blocs verds
+                GreenBlock greenBlock = new GreenBlock(x, y, blockWidth, blockHeight);
+                blocks.add(greenBlock);
+                y += blockHeight + gap;
+
+                // Generar bloc vermell
+                RedBlock redBlock = new RedBlock(x, y, blockWidth, blockHeight);
+                blocks.add(redBlock);
+                y += blockHeight + gap;
+
+                // Generar bloc blau
+                BlueBlock blueBlock = new BlueBlock(x, y, blockWidth, blockHeight, 2);
+                blocks.add(blueBlock);
+                //y += blockHeight + gap;
+
+
+                // Actualitzar la posició per passar a la següent columna
+                x += blockWidth + gap;
+                y = 50;
             }
         }
     }
 
 
+
     private void reset() {
         blocks.clear();
-        ball.reset(230, 400,10, 1,5, Color.white);
+        ball.reset(230, 400,15, 0,4, Color.white);
         player.reset(200, 550);
         level = 1;
         numLives = 3;
@@ -74,25 +112,20 @@ public class Game extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        for (int i = 0; i < 20; i++) {
-            int x = random.nextInt(getWidth());
-            int y = random.nextInt(getHeight());
-            int size = random.nextInt(5) + 1;
-            g.setColor(Color.WHITE);
-            g.fillRect(x, y, size, size);
+        for (Block block : blocks) {
+            block.draw(g);
         }
-        drawBlocks(g);
         ball.draw(g);
         player.draw(g);
         drawHUD(g);
         if (gameOver) {
             drawGameOver(g);
         }
-    }
-
-    private void drawBlocks(Graphics g) {
-        for (Block block : blocks) {
-            block.draw(g);
+        if (paused) {
+            drawStop(g);
+        }
+        if (devMode) {
+            drawDev(g);
         }
     }
 
@@ -100,16 +133,38 @@ public class Game extends JPanel {
     private void drawHUD(Graphics g) {
         g.setColor(Color.RED);
         g.setFont(new Font("Press Start", Font.BOLD, 20));
-        g.drawString("Level: " + level, 20, 20);
-        g.drawString("Score: " + score, 140, 20);
-        g.drawString("Lives: " + numLives, 250, 20);
+        g.drawString("Level: " + level, 60, 20);
+        g.drawString("Score: " + score, 180, 20);
+        g.drawString("Lives: " + numLives, 290, 20);
     }
 
 
     private void drawGameOver(Graphics g) {
-        g.setColor(Color.RED);
+        g.setColor(Color.magenta);
         g.drawString("GAME OVER", 160, 300);
         g.drawString("Press ENTER to play again", 100, 320);
+    }
+
+    private void drawStop(Graphics g) {
+        g.setColor(Color.magenta);
+        g.drawString("GAME PAUSED", 160, 300);
+        g.drawString("Press ENTER to continue playing", 100, 320);
+    }
+
+    private void drawDev(Graphics g) {
+        g.setColor(Color.magenta);
+        g.setFont(new Font("Dialog PLAIN", Font.BOLD, 15));
+        g.drawString("DEVELOP MODE", 160, 300);
+        g.drawString("p pos: " + player.getX()+" "+ player.getY(), 290, 40);
+        g.drawString("p wh: " + player.getWidth(), 290, 60);
+        g.drawString("b pos: " + ball.getX() +" "+ ball.getY(), 290,80);
+        g.drawString("Blocks: " + getBlocks(), 290,100);
+        g.drawString("collitions: " + collitions, 290,120);
+        g.drawString("p vel: " + player.getSpeed(), 290, 140);
+        int fps = updates;
+        g.drawString("FPS: " + fps, 290,160);
+        g.drawString("version: 0.3 ", 0,520);
+        g.drawString("Marc Martínez Miró", 0,540);
     }
 
     public boolean isGameOver() {
@@ -118,68 +173,120 @@ public class Game extends JPanel {
 
     public void update() {
         if (!paused && !isGameOver()) {
-            ball.move();
+            updates++;
+                // Comprobar colisión con los bloques
+                for (int i = 0; i < blocks.size(); i++) {
+                    Block block = blocks.get(i);
+                    if (ball.collidesWith(block.getBounds())) {
+                        // Verificar si es un bloque azul
+                        if (block instanceof BlueBlock blueBlock) {
+                            int speedBoost = blueBlock.getSpeedBoost();
+                            player.increaseSpeed(speedBoost);
+                            // Iniciar un temporizador para revertir el aumento de velocidad
+                            Timer timer = new Timer(10000, e -> player.resetSpeed());
+                            timer.setRepeats(false);
+                            timer.start();
+                        }
+                        if (block.hitsToBreak == 0){
+                            blocks.remove(i);
+                            score++;
+                        }
+
+                        if(block instanceof RedBlock redBlock){
+                        if (block.hitsToFall==0){
+                            redBlock.falling = true;
+                            if (numLives == 0) {
+                                blocks.remove(i);
+                            }
+                        }
+                        if (redBlock.collidesWith(player.getBounds())) {
+                            gameOver = true;
+                        }
+                        if (redBlock.getBottom() > getHeight()) {
+                            blocks.remove(i);
+                        }
+                        }
+
+                        block.hitsToBreak --;
+                        block.hitsToFall --;
+                        ball.reverseY();
 
 
-
-            // check collision with blocks
-            for (int i = 0; i < blocks.size(); i++) {
-                Block block = blocks.get(i);
-                if (ball.collidesWith(block)) {
-                    blocks.remove(i);
-                    i--;
-                    score++;
-
-                    if (blocks.isEmpty()) {
-                        levelUp();
+                        if (blocks.isEmpty()) {
+                            levelUp();
+                        }
+                        break;
                     }
-                    break;
+                    if(block instanceof RedBlock redBlock){
+                        if (redBlock.falling){
+                            redBlock.move();
+                        }
+                    }
                 }
-            }
 
-            // check collision with player
-            if (ball.collidesWith(player)) {
+
+
+            // Check collition with player
+            if (ball.collidesWith(player.getBounds())) {
+                collitions++;
                 int playerCenter = player.getX() + (player.getWidth() / 2);
-                int ballCenter = ball.getX() + ball.getDiameter() / 2;
+                int ballCenter = ball.getX() + (ball.getDiameter() / 2);
                 int collisionAngle = Math.abs(playerCenter - ballCenter);
 
-                ball.setYSpeed(-ball.getYSpeed());  // Reverse Y direction
-// Reverse Y direction<<
+                ball.reverseY();  // Invert direction Y
+
                 if (playerCenter < ballCenter) {
-                    // Ball collided with right half of player
-                    ball.setXSpeed(collisionAngle / 4);  // Move right
+                    // Ball impact on the right side of player
+                    ball.setXSpeed(collisionAngle / 4);  // Move to the right
                 } else {
-                    // Ball collided with left half of player
-                    ball.setXSpeed(-collisionAngle / 4);  // Move left
+                    // Ball impact on the left side of player
+                    ball.setXSpeed(-collisionAngle / 4);  // Move to the left
                 }
 
-                ball.setY(player.getTop() - ball.getDiameter());
+                // Update position
+                ball.setY(player.getY() - ball.getDiameter() - 1);
             }
 
 
-            // check if ball hits the top
+            // Move the ball
+            ball.move();
+
+            // Check ball top collition
             if (ball.getTop() < 0) {
                 ball.reverseY();
                 ball.setY(0);
             }
 
-            // check if ball hits the sides
+            // Check ball top with the sides
             if (ball.getLeft() < 0 || ball.getRight() > getWidth()) {
                 ball.reverseX();
             }
 
-            // check if ball hits the bottom
+            // Check ball top the end
             if (ball.getBottom() > getHeight()) {
                 numLives--;
+                //background color change
+                Timer timer = new Timer(200, e -> setBackground(Color.orange));
+                timer.setRepeats(false);
+                timer.start();
+                Timer timer2 = new Timer(400, e -> setBackground(Color.red));
+                timer2.setRepeats(false);
+                timer2.start();
+                Timer timer3 = new Timer(600, e -> setBackground(Color.yellow));
+                timer3.setRepeats(false);
+                timer3.start();
+                Timer timer4 = new Timer(800, e -> setBackground(Color.black));
+                timer4.setRepeats(false);
+                timer4.start();
                 if (numLives == 0) {
                     gameOver = true;
                 } else {
-                    ball.reset(230, 400,10, 10,10, Color.white);
+                    ball.reset(230, 400, 15, 0, 5, Color.WHITE);
                     paused = true;
                 }
             }
         } else {
-            gameOver = true;
+            paused = true;
         }
     }
 
@@ -189,18 +296,16 @@ public class Game extends JPanel {
 
 
     public void levelUp() {
-        if (level == MAX_LEVEL) {
+        if (level == maxLevel) {
             gameOver = true;
         } else {
             level++;
             blocks.clear();
-            //.reset(getWidth() / 2, getHeight() / 2, BALL_SIZE, BALL_SIZE, DELTA_X + level * 2, DELTA_Y + level * 2,
-              //      Color.WHITE);
+            ball.reset(230, 400,ball.getDiameter()/2, 0,4, Color.white);
             player.reset(230, 550);
             initBlocks();
             paused = true;
         }
     }
-
 
 }

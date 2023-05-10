@@ -3,14 +3,18 @@ import java.awt.Graphics;
 import java.awt.Rectangle;
 
 public class Player {
+    private int originalSpeed = 0;
     private int x;
     private int y;
-    private final int width;
-    private final int height;
+    private int width;
+    private int height;
+    private int speed;
+
+    private int boostSpeed = 2;
     private final Color color;
-    private final int speed;
-    private final Rectangle bounds;
-    private int direction;
+
+
+
 
     public Player(int x, int y, int width, int height, Color color, int speed) {
         this.x = x;
@@ -19,8 +23,7 @@ public class Player {
         this.height = height;
         this.color = color;
         this.speed = speed;
-        this.bounds = new Rectangle(x, y, width, height);
-        this.direction = 0;
+        this.originalSpeed=speed;
     }
 
     public int getX() {
@@ -39,9 +42,6 @@ public class Player {
         return getX() + getWidth();
     }
 
-    public void setDirection(int direction) {
-        this.direction = direction;
-    }
 
     public int getWidth() {
         return width;
@@ -55,48 +55,47 @@ public class Player {
         return color;
     }
 
-    public Rectangle getBounds() {
-        return bounds;
+    public int getSpeed() {
+        return speed;
     }
 
     public void moveLeft() {
-        if (x > 0) {
-            x -= 10;
+        if (x - speed >= 0) {
+            x -= speed;
         }
     }
 
     public void moveRight() {
-        if (x > 0) {
-            x += 10;
+        if (x + speed < 460) {
+            x += speed;
+        }
+        if (x + speed > 460) {
+            x = 460 - speed;
         }
     }
 
-    public void stop() {
-        setDirection(0);
+    public Rectangle getBounds() {
+        return new Rectangle(x, y, width, height);
     }
 
-
-    public void update() {
-        x += direction * speed;
-        if (x < 0) {
-            x = 0;
-        } else if (x + width > Game.WIDTH) {
-            x = Game.WIDTH - width;
-        }
-        bounds.setLocation(x, y);
-    }
 
     public void reset(int x, int y) {
         this.x = x;
         this.y = y;
     }
 
-    public int getTop() {
-        return y;
-    }
-
     public void draw(Graphics g) {
         g.setColor(color);
         g.fillRect(x, y, width, height);
+    }
+
+    public void increaseSpeed(int speedBoost) {
+        if(speed < 30){
+        speed = boostSpeed * speed;
+        }
+    }
+
+    public void resetSpeed() {
+        speed = originalSpeed;
     }
 }
