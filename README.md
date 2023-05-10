@@ -1,6 +1,6 @@
 # Arkanoid Game
 
-![Gameplay]([resources/img/gameplay.png])
+![Gameplay]([resources/img/gameplay.png)
 
 ## Description
 Arkanoid is a classic arcade game where the player controls a paddle to bounce a ball and break bricks. The objective is to clear all the bricks on the screen by hitting them with the ball without letting the ball fall off the paddle. The player earns points for each brick destroyed and progresses through levels with increasing difficulty.
