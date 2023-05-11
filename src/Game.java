@@ -180,7 +180,7 @@ public class Game extends JPanel {
         g.drawString("p vel: " + player.getSpeed(), 290, 140);
         int fps = updates;
         g.drawString("FPS: " + fps, 290,160);
-        g.drawString("version: 0.3 ", 0,520);
+        g.drawString("version: 1.0.0 ", 0,520);
         g.drawString("Marc Martínez Miró", 0,540);
     }
 
@@ -228,9 +228,7 @@ public class Game extends JPanel {
                         if (redBlock.collidesWith(player.getBounds())) {
                             gameOver = true;
                         }
-                        if (redBlock.getBottom() > getHeight()) {
-                            blocks.remove(i);
-                        }
+
                         }
 
                         block.hitsToBreak --;
@@ -249,7 +247,11 @@ public class Game extends JPanel {
                         if (redBlock.falling){
                             redBlock.move();
                         }
+                        if (redBlock.getBottom() > getHeight()) {
+                            blocks.remove(i);
+                        }
                     }
+
                 }
 
 
