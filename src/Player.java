@@ -13,8 +13,6 @@ public class Player {
     private final Color color;
 
 
-
-
     public Player(int x, int y, int width, int height, Color color, int speed) {
         this.x = x;
         this.y = y;
@@ -22,7 +20,7 @@ public class Player {
         this.height = height;
         this.color = color;
         this.speed = speed;
-        this.originalSpeed=speed;
+        this.originalSpeed = speed;
     }
 
     public int getX() {
@@ -46,16 +44,16 @@ public class Player {
     }
 
     public void moveLeft() {
-        if (x - speed >= 0) {
+        if (x  >= 0) {
             x -= speed;
         }
     }
 
     public void moveRight() {
-        if (x + speed < 460) {
+        if (x + getWidth() < 460) {
             x += speed;
         }
-        if (x + speed > 460) {
+        if (x + getWidth() > 460) {
             x = 460 - speed;
         }
     }
