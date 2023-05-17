@@ -8,8 +8,8 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 
-class Game extends JPanel {
-    int numColumns = 13;  // Num of colums
+public class Game extends JPanel {
+    int numColumns = 13;  // Num of columns
     int numRows = 1;    // Num of rows
     int blockWidth = 34; // Block width
     int blockHeight = 20; // Block height
@@ -19,7 +19,7 @@ class Game extends JPanel {
     private final Ball ball;
     private final Player player;
     private final StarsPanel starsPanel;
-    private final Music music;
+    private final AudioManager audioManager;
     private final HighScoresManager highScoresManager;
     private int level;
     private int numLives;
@@ -29,15 +29,16 @@ class Game extends JPanel {
     private boolean devMode;
     private int collations;
     private int updates;
-
+    private String initialsInput = "";
+    private boolean enterInitials;
 
     public Game() throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         blocks = new ArrayList<>();
         starsPanel = new StarsPanel();
-        music = new Music();
+        audioManager = new AudioManager();
         highScoresManager = new HighScoresManager();
         ball = new Ball(230, 400, 15, 0, 4, Color.WHITE);
-        player = new Player(200,550, 80, 10, Color.GRAY, 15);
+        player = new Player(200, 550, 80, 10, Color.GRAY, 15);
         level = 1;
         numLives = 3;
         score = 0;
@@ -45,24 +46,47 @@ class Game extends JPanel {
         paused = true;
         gameOver = false;
         devMode = false;
+        enterInitials = false;
 
         addKeyListener(new KeyAdapter() {
             @Override
             public void keyPressed(KeyEvent e) {
                 switch (e.getKeyCode()) {
-                    case KeyEvent.VK_LEFT -> player.moveLeft();
-                    case KeyEvent.VK_RIGHT -> player.moveRight();
-                    case KeyEvent.VK_P -> paused = !paused;
-                    case KeyEvent.VK_ENTER -> {
+                    case KeyEvent.VK_LEFT:
+                        player.moveLeft();
+                        break;
+                    case KeyEvent.VK_RIGHT:
+                        player.moveRight();
+                        break;
+                    case KeyEvent.VK_P:
+                        paused = !paused;
+                        break;
+
+                    case KeyEvent.VK_ENTER:
                         if (gameOver) {
-                            reset();  // Reset game on ENTER key press after game over
-                        }
-                        if (paused) {
+                            if (enterInitials) {
+                                highScoresManager.addScore(initialsInput, score);
+                                enterInitials = false;
+                                reset();
+                            }
+                        } else if (paused) {
                             paused = false;
                         }
-
+                        break;
+                    case KeyEvent.VK_F1:
+                        devMode = !devMode;
+                        break;
+                }
+                if (gameOver) {
+                    if (enterInitials) {
+                        if (e.getKeyCode() == KeyEvent.VK_BACK_SPACE) {
+                            if (initialsInput.length() > 0) {
+                                initialsInput = initialsInput.substring(0, initialsInput.length() - 1);
+                            }
+                        } else if (initialsInput.length() < 3) {
+                            initialsInput += e.getKeyChar();
+                        }
                     }
-                    case KeyEvent.VK_F1 -> devMode = !devMode;
                 }
             }
         });
@@ -71,32 +95,6 @@ class Game extends JPanel {
         initBlocks();  // Initialize blocks
     }
 
-
-
-    private void gameOver() {
-        gameOver = true;
-        paused = true;
-        JTextField initialsField = new JTextField();
-        Object[] message = {"Enter your initials:", initialsField};
-        int option = JOptionPane.showOptionDialog(
-                null,
-                message,
-                "Game Over",
-                JOptionPane.DEFAULT_OPTION,
-                JOptionPane.PLAIN_MESSAGE,
-                null,
-                null,
-                null
-        );
-
-        if (option == JOptionPane.OK_OPTION) {
-            String initials = initialsField.getText().trim();
-
-            // Add the score to high scores
-            highScoresManager.addScore(initials, score);
-        }
-
-    }
 
 
     private void initBlocks() {
@@ -156,6 +154,7 @@ class Game extends JPanel {
         player.draw(g);
         drawHUD(g);
         if (gameOver) {
+            enterInitials = true;
             paused = false;
             drawGameOver(g);
         }
@@ -170,7 +169,7 @@ class Game extends JPanel {
 
     private void drawHUD(Graphics g) {
         g.setColor(Color.RED);
-        g.setFont(new Font("Press Start", Font.BOLD, 20));
+        g.setFont(new Font (Font.DIALOG, Font.BOLD, 20));
         g.drawString("Level: " + level, 60, 20);
         g.drawString("Score: " + score, 180, 20);
         g.drawString("Lives: " + numLives, 290, 20);
@@ -178,16 +177,73 @@ class Game extends JPanel {
 
 
     private void drawGameOver(Graphics g) {
+        int windowWidth = getWidth();
+        int windowHeight = getHeight();
+
         g.setColor(Color.magenta);
-        g.drawString("GAME OVER", 160, 300);
-        g.drawString("Enter your initials: ", 100, 320);
-        g.drawString("_ _ _", 100, 340);
-        g.drawString("Press ENTER to play again", 100, 360);
+        g.setFont(new Font("Dialog PLAIN", Font.BOLD, 30));
+
+        String gameOverText = "GAME OVER";
+        int gameOverTextWidth = g.getFontMetrics().stringWidth(gameOverText);
+        int gameOverTextX = (windowWidth - gameOverTextWidth) / 2;
+        int gameOverTextY = windowHeight / 2 - 40;
+
+        g.drawString(gameOverText, gameOverTextX, gameOverTextY);
+
+        g.setFont(new Font("Dialog PLAIN", Font.BOLD, 15));
+
+        String playAgainText = "Press ENTER to play again";
+        int playAgainTextWidth = g.getFontMetrics().stringWidth(playAgainText);
+        int playAgainTextX = (windowWidth - playAgainTextWidth) / 2;
+        int playAgainTextY = windowHeight / 2;
+
+        g.drawString(playAgainText, playAgainTextX, playAgainTextY);
+
+        String initialsText = "Enter your initials to save your score:";
+        int initialsTextWidth = g.getFontMetrics().stringWidth(initialsText);
+        int initialsTextX = (windowWidth - initialsTextWidth) / 2;
+        int initialsTextY = windowHeight / 2 + 20;
+        g.drawString(initialsText, initialsTextX, initialsTextY);
+
+        String initialsText2 = "INITIALS:";
+        int initialsText2Width = g.getFontMetrics().stringWidth(initialsText2);
+        int initialsText2X = (windowWidth - initialsText2Width) / 2;
+        int initialsText2Y = windowHeight / 2 + 40;
+        g.drawString(initialsText2, initialsText2X, initialsText2Y);
+
+        String initialsInputText = initialsInput;
+        int initialsInputTextWidth = g.getFontMetrics().stringWidth(initialsInputText);
+        int initialsInputTextX = (windowWidth - initialsInputTextWidth) / 2;
+        int initialsInputTextY = windowHeight / 2 + 60;
+        g.drawString(initialsInputText, initialsInputTextX, initialsInputTextY);
+
+        g.setColor(Color.GREEN);
+
+        String scoresText = "SCORES:";
+        int scoresTextWidth = g.getFontMetrics().stringWidth(scoresText);
+        int scoresTextX = (windowWidth - scoresTextWidth) / 2;
+        int scoresTextY = windowHeight / 2 + 90;
+
+        g.drawString(scoresText, scoresTextX, scoresTextY);
+
+        for (int i = 0; i < highScoresManager.getHighScores().size(); i++) {
+            String scoreText = highScoresManager.getHighScores().get(i).getInitials() + ":" + highScoresManager.getHighScores().get(i).getScore();
+            int scoreTextWidth = g.getFontMetrics().stringWidth(scoreText);
+            int scoreTextX = (windowWidth - scoreTextWidth) / 2;
+            int scoreTextY = windowHeight / 2 + 110 + (i * 20);
+
+            g.drawString(scoreText, scoreTextX, scoreTextY);
+        }
     }
+
+
+
 
     private void drawStop(Graphics g) {
         g.setColor(Color.magenta);
-        g.drawString("GAME PAUSED", 160, 300);
+        g.setFont(new Font("Dialog PLAIN", Font.BOLD, 30));
+        g.drawString("GAME PAUSED", 130, 300);
+        g.setFont(new Font("Dialog PLAIN", Font.BOLD, 15));
         g.drawString("Press ENTER to continue playing", 100, 320);
     }
 
@@ -203,7 +259,7 @@ class Game extends JPanel {
         g.drawString("p vel: " + player.getSpeed(), 290, 140);
         int fps = updates;
         g.drawString("FPS: " + fps, 290,160);
-        g.drawString("version: 1.1.0 ", 0,520);
+        g.drawString("version: 1.2.0 ", 0,520);
         g.drawString("Marc Martínez Miró", 0,540);
     }
 
@@ -212,22 +268,22 @@ class Game extends JPanel {
         return numLives == 0 || blocks.isEmpty();
     }
 
-    public void update() {
+    public void update(){
         if (!paused && !isGameOver()) {
             updates++;
                 // Check collisions with blocks
-                for (int i = 0; i < blocks.size(); i++) {
+            for (int i = 0; i < blocks.size(); i++) {
                     Block block = blocks.get(i);
                     if (ball.collidesWith(block.getBounds())) {
 
 
-                        music.soundClip1.start();
+                        audioManager.playSound("sound1");
 
-                        // Verificar si es un bloque azul
+                        // VCheck if the block is blue
                         if (block instanceof BlueBlock blueBlock) {
                             int speedBoost = blueBlock.getSpeedBoost();
                             player.increaseSpeed(speedBoost);
-                            // Iniciar un temporizador para revertir el aumento de velocidad
+                            // Init a timer to reset the speed
                             Timer timer = new Timer(10000, e -> player.resetSpeed());
                             timer.setRepeats(false);
                             timer.start();
@@ -242,7 +298,7 @@ class Game extends JPanel {
                             redBlock.falling = true;
 
 
-                            music.soundClip2.start();
+                            audioManager.playSound("sound2");
 
                             if (numLives == 0) {
                                 blocks.remove(i);
@@ -255,7 +311,7 @@ class Game extends JPanel {
                         }
 
 
-                        music.soundClip3.start();
+                        audioManager.playSound("sound1");
                         ball.reverseY();
 
 
@@ -283,7 +339,7 @@ class Game extends JPanel {
             // Check collition with player
             if (ball.collidesWith(player.getBounds())) {
 
-                music.soundClip4.start();
+                audioManager.playSound("sound3");
                 collations++;
                 int playerCenter = player.getX() + (player.getWidth() / 2);
                 int ballCenter = ball.getX() + (ball.getDiameter() / 2);
@@ -311,7 +367,7 @@ class Game extends JPanel {
             if (ball.getTop() < 0) {
 
 
-                music.soundClip5.start();
+                audioManager.playSound("sound4");
 
                 ball.reverseY();
                 ball.setY(0);
@@ -320,7 +376,7 @@ class Game extends JPanel {
             // Check ball top with the sides
             if (ball.getLeft() < 0 || ball.getRight() > getWidth()) {
 
-                music.soundClip6.start();
+                audioManager.playSound("sound5");
                 ball.reverseX();
             }
 
@@ -328,24 +384,26 @@ class Game extends JPanel {
             if (ball.getBottom() > getHeight()) {
                 numLives--;
 
-                music.soundClip7.start();
+                audioManager.playSound("sound6");
                 //background color change beta
-                Timer timer = new Timer(200, e -> setBackground(Color.orange));
+                Timer timer = new Timer(100, e -> setBackground(Color.orange));
                 timer.setRepeats(false);
                 timer.start();
-                Timer timer2 = new Timer(400, e -> setBackground(Color.red));
+                Timer timer2 = new Timer(150, e -> setBackground(Color.red));
                 timer2.setRepeats(false);
                 timer2.start();
-                Timer timer3 = new Timer(600, e -> setBackground(Color.yellow));
+                Timer timer3 = new Timer(200, e -> setBackground(Color.white));
                 timer3.setRepeats(false);
                 timer3.start();
-                Timer timer4 = new Timer(800, e -> setBackground(Color.black));
+                Timer timer4 = new Timer(250, e -> setBackground(Color.yellow));
                 timer4.setRepeats(false);
                 timer4.start();
+                Timer timer5 = new Timer(300, e -> setBackground(Color.black));
+                timer5.setRepeats(false);
+                timer5.start();
                 if (numLives == 0) {
                     gameOver = true;
-                    gameOver();
-                    music.soundClip8.start();
+                    audioManager.playSound("sound7");
                 } else {
                     ball.reset(230, 400, 15, 0, 5, Color.WHITE);
                     paused = true;
@@ -361,11 +419,11 @@ class Game extends JPanel {
     }
 
 
-    public void levelUp() {
+    public void levelUp(){
         if (level == maxLevel) {
             gameOver = true;
         } else {
-            music.soundClip9.start();
+            audioManager.playSound("sound8");
             level++;
             blocks.clear();
             ball.reset(230, 400,ball.getDiameter()/2, 0,4, Color.white);

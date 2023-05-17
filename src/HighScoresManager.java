@@ -1,12 +1,11 @@
 import java.io.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
 public class HighScoresManager {
     private static final int MAX_SCORES = 10;
-    private static final String FILENAME = "highscores.JSON";
+    private static final String FILENAME = "highScores.JSON";
 
     private List<Score> highScores;
 
@@ -34,7 +33,7 @@ public class HighScoresManager {
     private void saveScoresToFile() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILENAME))) {
             for (Score score : highScores) {
-                writer.write(score.getInitials() + ": " + score.getScore());
+                writer.write(score.initials() + ": " + score.score());
                 writer.newLine();
             }
         } catch (IOException e) {
@@ -54,7 +53,7 @@ public class HighScoresManager {
     }
 
     private void sortScores() {
-        Collections.sort(highScores, Comparator.comparingInt(Score::getScore).reversed());
+        highScores.sort(Comparator.comparingInt(Score::score).reversed());
     }
 
     private void trimScores() {
@@ -63,17 +62,10 @@ public class HighScoresManager {
         }
     }
 
-    public static class Score {
-        private String initials;
-        private int score;
-
-        public Score(String initials, int score) {
-            this.initials = initials;
-            this.score = score;
-        }
-
+    public record Score(String initials, int score) {
         public String getInitials() {
             return initials;
+
         }
 
         public int getScore() {

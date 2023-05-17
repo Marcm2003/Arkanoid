@@ -11,8 +11,6 @@ public class StarsPanel  {
     private static final int MAX_BRIGHTNESS = 255;
     private static final int MIN_BRIGHTNESS = 128;
 
-    private final Random random = new Random();
-
     private final List<Star> stars = new ArrayList<>();
 
     private static class Star {
@@ -25,6 +23,7 @@ public class StarsPanel  {
     public StarsPanel() {
         for (int i = 0; i < NUM_STARS; i++) {
             Star star = new Star();
+            Random random = new Random();
             star.x = random.nextInt(460);
             star.y = random.nextInt(600);
             star.size = random.nextInt(MAX_SIZE - MIN_SIZE) + MIN_SIZE;
