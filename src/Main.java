@@ -7,8 +7,8 @@ public class Main {
 
     public static void main(String[] args) throws UnsupportedAudioFileException, LineUnavailableException, IOException {
         JFrame frame = new JFrame("Arkanoid 1.2.0");
-        ImageIcon img = new ImageIcon("resources/img/icon.png");
-        frame.setIconImage(img.getImage());
+        ImageIcon icon = new ImageIcon("../resources/img/icon.png");
+        frame.setIconImage(icon.getImage());
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setSize(460, 600);
         frame.setLocationRelativeTo(null);
