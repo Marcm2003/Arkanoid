@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.Random;
 
 public class TextRenderer {
     public static int collations;
@@ -106,22 +107,47 @@ public class TextRenderer {
         int windowHeight = g.getClipBounds().height;
 
         g.setColor(Color.magenta);
-        g.setFont(arcadeFont.deriveFont(Font.BOLD, 20));
+        g.setFont(arcadeFont.deriveFont(Font.BOLD, 40));
 
+        String arkanoidText = "ARKANOID";
+        int arkanoidTextWidth = g.getFontMetrics().stringWidth(arkanoidText);
+        int arkanoidTextX = (windowWidth - arkanoidTextWidth) / 2;
+        int arkanoidTextY = windowHeight / 2 - 40;
+
+        Random random = new Random(); // For generating random colors
+
+        for (int i = 0; i < arkanoidText.length(); i++) {
+            // Generate a random color
+            int red = random.nextInt(256);
+            int green = random.nextInt(256);
+            int blue = random.nextInt(256);
+            Color color = new Color(red, green, blue);
+
+            // Config the color before drawing
+            g.setColor(color);
+
+            // Draw each letter
+            char letter = arkanoidText.charAt(i);
+            int letterX = arkanoidTextX + g.getFontMetrics().charWidth(letter) * i;
+            g.drawString(String.valueOf(letter), letterX, arkanoidTextY);
+        }
+
+        g.setColor(Color.magenta);
+        g.setFont(arcadeFont.deriveFont(Font.BOLD, 10));
         String startText = "PRESS ENTER TO START";
         int startTextWidth = g.getFontMetrics().stringWidth(startText);
         int startTextX = (windowWidth - startTextWidth) / 2;
         int startTextY = windowHeight / 2;
         g.drawString(startText, startTextX, startTextY);
 
-        g.setFont(arcadeFont.deriveFont(Font.BOLD, 15));
+        g.setFont(arcadeFont.deriveFont(Font.BOLD, 10));
         g.setColor(Color.green);
 
         for (int i = 0; i < highScoresManager.getHighScores().size(); i++) {
             String scoreText = highScoresManager.getHighScores().get(i).getInitials() + ":" + highScoresManager.getHighScores().get(i).getScore();
             int scoreTextWidth = g.getFontMetrics().stringWidth(scoreText);
             int scoreTextX = (windowWidth - scoreTextWidth) / 2;
-            int scoreTextY = windowHeight / 2 + 60 + (i * 20);
+            int scoreTextY = windowHeight / 2 + 30 + (i * 20);
 
             g.drawString(scoreText, scoreTextX, scoreTextY);
         }
@@ -130,9 +156,19 @@ public class TextRenderer {
     public static void drawStop(Graphics g) {
         g.setFont(arcadeFont.deriveFont(Font.BOLD, 30));
         g.setColor(Color.magenta);
-        g.drawString("GAME PAUSED", 90, 300);
+
+        String stopText = "GAME PAUSED";
+        int stopTextWidth = g.getFontMetrics().stringWidth(stopText);
+        int stopTextX = (g.getClipBounds().width - stopTextWidth) / 2;
+        int stopTextY = g.getClipBounds().height / 2 - 40;
+        g.drawString(stopText, stopTextX, stopTextY);
+
         g.setFont(arcadeFont.deriveFont(Font.BOLD, 15));
-        g.drawString("Press ENTER to continue playing", 80, 320);
+        String stopText2 = "PRESS ENTER TO CONTINUE";
+        int stopText2Width = g.getFontMetrics().stringWidth(stopText2);
+        int stopText2X = (g.getClipBounds().width - stopText2Width) / 2;
+        int stopText2Y = g.getClipBounds().height / 2;
+        g.drawString(stopText2, stopText2X, stopText2Y);
     }
 
 

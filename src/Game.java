@@ -37,8 +37,8 @@ public class Game extends JPanel {
         starsPanel = new StarsPanel();
         audioManager = new AudioManager();
         highScoresManager = new HighScoresManager();
-        ball = new Ball(230, 400, 15, 0, 4, Color.WHITE);
-        player = new Player(200, 550, 80, 10, Color.GRAY, 15);
+        ball = new Ball(210, 400, 15, 0, 4, Color.WHITE);
+        player = new Player(180, 550, 80, 10, Color.GRAY, 15);
         level = 1;
         numLives = 3;
         score = 0;
@@ -46,6 +46,8 @@ public class Game extends JPanel {
         paused = false;
         gameOver = false;
         devMode = false;
+        audioManager.playSound("sound9");
+
 
 
         addKeyListener(new KeyAdapter() {
@@ -130,7 +132,7 @@ public class Game extends JPanel {
         starsPanel.paintComponent(g);
         ball.draw(g);
         player.draw(g);
-        TextRenderer.drawHUD(g, level, numLives, score);
+        TextRenderer.drawHUD(g, level, score, numLives);
         if (gameOver) {
             paused = false;
             TextRenderer.drawGameOver(g);
@@ -178,6 +180,7 @@ public class Game extends JPanel {
 
     public void update() {
         if (!start && !paused && !isGameOver()) {
+            audioManager.stopSound("sound9");
             TextRenderer.updates++;
             // Check collisions with blocks
             for (int i = 0; i < blocks.size(); i++) {

@@ -21,6 +21,7 @@ public class AudioManager {
         soundClips.put("sound6", loadSoundClip("resources/sounds/live.wav"));
         soundClips.put("sound7", loadSoundClip("resources/sounds/game-over.wav"));
         soundClips.put("sound8", loadSoundClip("resources/sounds/levelUP.wav"));
+        soundClips.put("sound9", loadSoundClip("resources/sounds/music.wav"));
     }
 
     private Clip loadSoundClip(String filePath) throws UnsupportedAudioFileException, IOException, LineUnavailableException {
@@ -35,6 +36,13 @@ public class AudioManager {
         if (clip != null) {
             clip.setFramePosition(0);
             clip.start();
+        }
+    }
+
+    public void stopSound(String sound9) {
+        Clip clip = soundClips.get(sound9);
+        if (clip != null) {
+            clip.stop();
         }
     }
 }
