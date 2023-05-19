@@ -111,6 +111,14 @@ public class Game extends JPanel {
                 // Generates blue block
                 BlueBlock blueBlock = new BlueBlock(x, y, blockWidth, blockHeight, 2);
                 blocks.add(blueBlock);
+                y += blockHeight + gap;
+
+                PinkBlock pinkBlock = new PinkBlock(x, y, blockWidth, blockHeight);
+                blocks.add(pinkBlock);
+                y += blockHeight + gap;
+
+                YellowBlock yellowBlock = new YellowBlock(x, y, blockWidth, blockHeight);
+                blocks.add(yellowBlock);
                 //y += blockHeight + gap;
 
 
@@ -125,14 +133,15 @@ public class Game extends JPanel {
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
-
+        if (!start && !paused && !isGameOver()) {
         for (Block block : blocks) {
             block.draw(g);
         }
-        starsPanel.paintComponent(g);
         ball.draw(g);
         player.draw(g);
         TextRenderer.drawHUD(g, level, score, numLives);
+        }
+        starsPanel.paintComponent(g);
         if (gameOver) {
             paused = false;
             TextRenderer.drawGameOver(g);
@@ -142,6 +151,12 @@ public class Game extends JPanel {
         }
         if (paused) {
             TextRenderer.drawStop(g);
+            for (Block block : blocks) {
+                block.draw(g);
+            }
+            ball.draw(g);
+            player.draw(g);
+            TextRenderer.drawHUD(g, level, score, numLives);
         }
         if (devMode) {
             TextRenderer.drawDev(g, ball, player);

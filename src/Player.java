@@ -75,6 +75,7 @@ public class Player {
         }
     }
 
+
     public void resetSpeed() {
         speed = originalSpeed;
     }

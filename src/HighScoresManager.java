@@ -1,11 +1,16 @@
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.*;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 public class HighScoresManager {
     private static final int MAX_SCORES = 10;
-    private static final String FILENAME = "highScores.JSON";
+    private static final String FILENAME = "highScores.json";
 
     private List<Score> highScores;
 
@@ -16,15 +21,16 @@ public class HighScoresManager {
 
     private void loadScoresFromFile() {
         try (BufferedReader reader = new BufferedReader(new FileReader(FILENAME))) {
+            StringBuilder jsonBuilder = new StringBuilder();
             String line;
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(":");
-                if (parts.length == 2) {
-                    String initials = parts[0].trim();
-                    int score = Integer.parseInt(parts[1].trim());
-                    highScores.add(new Score(initials, score));
-                }
+                jsonBuilder.append(line);
             }
+            String json = jsonBuilder.toString();
+
+            Type listType = new TypeToken<List<Score>>() {}.getType();
+            Gson gson = new GsonBuilder().create();
+            highScores = gson.fromJson(json, listType);
         } catch (IOException e) {
             System.out.println("Error loading high scores: " + e.getMessage());
         }
@@ -32,10 +38,9 @@ public class HighScoresManager {
 
     private void saveScoresToFile() {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILENAME))) {
-            for (Score score : highScores) {
-                writer.write(score.initials() + ": " + score.score());
-                writer.newLine();
-            }
+            Gson gson = new GsonBuilder().setPrettyPrinting().create();
+            String json = gson.toJson(highScores);
+            writer.write(json);
         } catch (IOException e) {
             System.out.println("Error saving high scores: " + e.getMessage());
         }

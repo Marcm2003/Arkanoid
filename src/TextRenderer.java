@@ -39,9 +39,17 @@ public class TextRenderer {
     public static void drawHUD(Graphics g, int level, int score, int numLives) {
         g.setColor(Color.RED);
         g.setFont(arcadeFont.deriveFont(Font.BOLD, 15));
-        g.drawString("Level: " + level, 10, 30);
-        g.drawString("Score: " + score, 160, 30);
-        g.drawString("Lives: " + numLives, 310, 30);
+        g.drawString("Level: ", 10, 30);
+        g.setColor(Color.white);
+        g.drawString(String.valueOf(level), 110, 30);
+        g.setColor(Color.RED);
+        g.drawString("Score: ", 160, 30);
+        g.setColor(Color.white);
+        g.drawString(String.valueOf(score), 260, 30);
+        g.setColor(Color.RED);
+        g.drawString("Lives: ", 310, 30);
+        g.setColor(Color.white);
+        g.drawString(String.valueOf(numLives), 410, 30);
     }
 
     public static void drawGameOver(Graphics g) {
@@ -143,11 +151,17 @@ public class TextRenderer {
         g.setFont(arcadeFont.deriveFont(Font.BOLD, 10));
         g.setColor(Color.green);
 
+        String scoresText = "SCORES:";
+        int scoresTextWidth = g.getFontMetrics().stringWidth(scoresText);
+        int scoresTextX = (windowWidth - scoresTextWidth) / 2;
+        int scoresTextY = windowHeight / 2 + 20;
+        g.drawString(scoresText, scoresTextX, scoresTextY);
+
         for (int i = 0; i < highScoresManager.getHighScores().size(); i++) {
             String scoreText = highScoresManager.getHighScores().get(i).getInitials() + ":" + highScoresManager.getHighScores().get(i).getScore();
             int scoreTextWidth = g.getFontMetrics().stringWidth(scoreText);
             int scoreTextX = (windowWidth - scoreTextWidth) / 2;
-            int scoreTextY = windowHeight / 2 + 30 + (i * 20);
+            int scoreTextY = windowHeight / 2 + 40 + (i * 20);
 
             g.drawString(scoreText, scoreTextX, scoreTextY);
         }
